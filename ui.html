@@ -8,16 +8,18 @@
   :root {
     --orange: #d69829;
     --orange-dark: #b8801f;
-    --black: #1e1e1e;
-    --dark: #363636;
-    --card: #2a2a2a;
-    --card2: #333333;
-    --border: #4a4a4a;
+    --black: #1b1b1b;
+    --dark: #2c2c2c;
+    --card: #242424;
+    --card2: #2e2e2e;
+    --border: rgba(255,255,255,0.08);
     --text: #f0f0f0;
-    --muted: #999;
+    --muted: #8f8f8f;
     --success: #4caf50;
     --error: #f44336;
-    --radius: 6px;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 2px rgba(0,0,0,0.25);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -29,76 +31,72 @@
   }
 
   /* ── Header ── */
-  header { background: var(--dark); border-bottom: 3px solid var(--orange); padding: 14px 16px; display: flex; align-items: center; justify-content: center; }
+  header { background: var(--dark); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: center; }
   .header-logo { display: flex; align-items: center; }
-  .header-logo svg { height: 28px; width: auto; }
+  .header-logo svg { height: 24px; width: auto; }
 
   /* ── Layout switcher ── */
-  .layout-switcher { display: flex; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--dark); }
+  .layout-switcher { display: flex; gap: 6px; padding: 10px 14px; background: var(--dark); }
   .layout-btn {
-    flex: 1; padding: 8px; border-radius: var(--radius);
-    border: 1.5px solid var(--border); background: var(--card);
+    flex: 1; padding: 9px 6px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--card);
     color: var(--muted); cursor: pointer; text-align: center;
-    transition: all 0.15s; font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.5px;
+    transition: border-color 0.15s, color 0.15s, background 0.15s; font-size: 11px; font-weight: 600;
   }
   .layout-btn:hover { border-color: var(--orange); color: var(--text); }
-  .layout-btn.active { border-color: var(--orange); background: rgba(232,96,28,0.12); color: var(--orange); }
-  .layout-btn .lb-icon { font-size: 16px; display: block; margin-bottom: 3px; }
-  .layout-btn .lb-sub { font-size: 10px; color: var(--muted); font-weight: 400; display: block; margin-top: 1px; }
-  .layout-btn.active .lb-sub { color: rgba(214,152,41,0.8); }
+  .layout-btn.active { border-color: var(--orange); background: rgba(214,152,41,0.12); color: var(--orange); }
+  .layout-btn .lb-icon { font-size: 15px; display: block; margin-bottom: 2px; }
 
   /* ── Conteúdo com scroll nativo ── */
   .content { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
 
   /* ── Veículo card ── */
-  .veiculo-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .veiculo-header { padding: 9px 12px; background: var(--dark); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
-  .v-num { width: 20px; height: 20px; border-radius: 50%; background: var(--orange); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .veiculo-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+  .veiculo-header { padding: 10px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .v-num { width: 18px; height: 18px; border-radius: 50%; background: var(--orange); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .v-title { font-size: 12px; font-weight: 600; flex: 1; }
   .v-toggle { color: var(--muted); font-size: 10px; transition: transform 0.2s; }
   .veiculo-card.collapsed .v-toggle { transform: rotate(-90deg); }
-  .veiculo-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .veiculo-body { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 9px; }
   .veiculo-card.collapsed .veiculo-body { display: none; }
 
-  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--orange); padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); padding-top: 4px; }
 
   .field { display: flex; flex-direction: column; gap: 4px; }
-  .field label { font-size: 12px; color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 1px; }
-  .layer-tag { font-size: 9px; color: var(--muted); background: rgba(255,255,255,0.06); padding: 1px 4px; border-radius: 3px; font-family: monospace; font-weight: 400; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 500; }
   .field input[type="text"], .field textarea {
     background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius);
-    color: var(--text); padding: 7px 10px; font-size: 13px; width: 100%;
+    color: var(--text); padding: 8px 10px; font-size: 13px; width: 100%;
     transition: border-color 0.15s; font-family: inherit; resize: none;
   }
   .field input:focus, .field textarea:focus { outline: none; border-color: var(--orange); }
-  .field textarea { min-height: 54px; }
+  .field textarea { min-height: 48px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
   .grid3 .img-upload { padding: 8px 6px; flex-direction: column; align-items: center; text-align: center; }
-  .grid3 .img-thumb { width: 36px; height: 36px; margin-bottom: 2px; }
-  .grid3 .img-ph strong { font-size: 11px; }
+  .grid3 .img-thumb { width: 32px; height: 32px; margin-bottom: 2px; }
+  .grid3 .img-ph strong { font-size: 10px; }
   .grid3 .img-ph small { display: none; }
 
   /* ── Image upload ── */
   .img-upload-wrap { position: relative; }
   .img-upload {
-    border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 10px;
+    border: 1px dashed var(--border); border-radius: var(--radius); padding: 9px;
     display: flex; align-items: center; gap: 9px; transition: border-color 0.15s, background 0.15s; cursor: pointer;
   }
-  .img-upload:hover { border-color: var(--orange); background: rgba(232,96,28,0.05); }
+  .img-upload:hover { border-color: var(--orange); background: rgba(214,152,41,0.05); }
   .img-upload.has-image { border-style: solid; border-color: var(--orange); }
   .img-upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
-  .img-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0; display: none; }
+  .img-thumb { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; flex-shrink: 0; display: none; }
   .img-upload.has-image .img-thumb { display: block; }
   .img-ph { display: flex; flex-direction: column; gap: 2px; }
-  .img-ph strong { font-size: 12px; color: var(--text); }
-  .img-ph small { font-size: 10px; color: var(--muted); }
+  .img-ph strong { font-size: 11px; color: var(--text); font-weight: 500; }
+  .img-ph small { font-size: 9px; color: var(--muted); }
   .img-clear { position: absolute; top: 6px; right: 6px; z-index: 3; background: var(--card2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: 11px; padding: 2px 7px; border-radius: 4px; display: none; }
 
   /* ── Footer ── */
-  .footer { padding: 11px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 7px; background: var(--dark); margin-top: 4px; }
-  .btn { width: 100%; padding: 10px; border-radius: var(--radius); border: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s, opacity 0.15s; text-transform: uppercase; letter-spacing: 0.5px; }
+  .footer { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; background: var(--dark); margin-top: 4px; }
+  .btn { width: 100%; padding: 10px; border-radius: var(--radius); border: none; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background 0.15s, opacity 0.15s; }
   .btn-primary { background: var(--orange); color: #fff; }
   .btn-primary:hover { background: var(--orange-dark); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -111,41 +109,48 @@
   .scan-info strong { color: var(--text); }
 
   /* ── Toast ── */
-  #toast { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 20px; font-size: 12px; opacity: 0; transition: all 0.2s; pointer-events: none; white-space: nowrap; z-index: 99; max-width: 90%; text-align: center; }
+  #toast { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 20px; font-size: 12px; opacity: 0; transition: all 0.2s; pointer-events: none; white-space: nowrap; z-index: 99; max-width: 90%; text-align: center; box-shadow: var(--shadow); }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   #toast.success { border-color: var(--success); color: var(--success); }
   #toast.error { border-color: var(--error); color: var(--error); }
 
-  /* ── Mode tabs (Manual / Massa) ── */
-  .mode-tabs { display: flex; gap: 6px; padding: 10px 14px 0; background: var(--dark); }
-  .mode-tab { flex: 1; padding: 9px; border-radius: var(--radius) var(--radius) 0 0; border: 1px solid var(--border); border-bottom: none; background: var(--card); color: var(--muted); cursor: pointer; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.15s; }
+  /* ── Mode tabs (Manual / Massa / Completa) ── */
+  .mode-tabs { display: flex; gap: 6px; padding: 10px 14px; background: var(--dark); }
+  .mode-tab { flex: 1; padding: 9px 4px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; text-align: center; font-size: 10.5px; font-weight: 600; line-height: 1.4; transition: all 0.15s; }
   .mode-tab:hover { color: var(--text); }
   .mode-tab.active { background: rgba(214,152,41,0.14); border-color: var(--orange); color: var(--orange); }
 
   /* ── Produção em massa ── */
-  .mass-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-  .tmpl-switch { display: flex; gap: 8px; }
-  .tmpl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.35; transition: all 0.15s; }
+  .mass-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .tmpl-switch { display: flex; gap: 6px; }
+  .tmpl-btn { flex: 1; padding: 9px 6px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; text-align: center; font-size: 11px; font-weight: 600; line-height: 1.3; transition: all 0.15s; }
   .tmpl-btn:hover { border-color: var(--orange); color: var(--text); }
   .tmpl-btn.active { border-color: var(--orange); background: rgba(214,152,41,0.12); color: var(--orange); }
+  .tmpl-btn .tb-sub { display: block; font-size: 9px; font-weight: 400; color: var(--muted); margin-top: 1px; }
+  .tmpl-btn.active .tb-sub { color: rgba(214,152,41,0.75); }
   .drop-field { display: flex; flex-direction: column; gap: 5px; }
-  .drop-label { font-size: 12px; font-weight: 600; color: var(--text); }
-  .file-btn { position: relative; border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 12px; text-align: center; font-size: 12px; color: var(--muted); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-  .file-btn:hover { border-color: var(--orange); background: rgba(232,96,28,0.05); }
+  .drop-label { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+  .file-btn { position: relative; border: 1px dashed var(--border); border-radius: var(--radius); padding: 11px; text-align: center; font-size: 12px; color: var(--muted); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .file-btn:hover { border-color: var(--orange); background: rgba(214,152,41,0.05); }
   .file-btn input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
   .file-btn.done { border-style: solid; border-color: var(--orange); color: var(--text); }
   .status-line { font-size: 11px; line-height: 1.5; padding: 2px 0; min-height: 4px; }
   .status-line.ok { color: var(--success); }
   .status-line.warn { color: #e0b34d; }
   .status-line.err { color: var(--error); }
-  .mass-preview { max-height: 150px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); display: none; }
+  .mass-preview { max-height: 140px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); display: none; }
   .mass-preview.visible { display: block; }
   .mass-preview table { border-collapse: collapse; width: 100%; font-size: 10px; }
   .mass-preview th { position: sticky; top: 0; background: var(--dark); color: var(--orange); padding: 4px 6px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
   .mass-preview td { padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text); white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
-  .mass-hint { font-size: 10px; color: var(--muted); line-height: 1.6; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
-  .mass-hint code { color: var(--orange); font-family: monospace; }
-  .mass-hint strong { color: var(--text); }
+  .mass-hint { font-size: 11px; color: var(--muted); cursor: pointer; }
+  .mass-hint summary { list-style: none; cursor: pointer; color: var(--muted); font-weight: 500; }
+  .mass-hint summary::-webkit-details-marker { display: none; }
+  .mass-hint summary:before { content: "ⓘ "; }
+  .mass-hint[open] summary { color: var(--text); margin-bottom: 6px; }
+  .mass-hint-body { font-size: 10.5px; line-height: 1.6; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+  .mass-hint-body code { color: var(--orange); font-family: monospace; }
+  .mass-hint-body strong { color: var(--text); }
   .warnings { margin: 6px 0 0; padding-left: 16px; font-size: 10px; color: #e0b34d; line-height: 1.5; }
 </style>
 </head>
@@ -193,19 +198,13 @@
 
 <div class="layout-switcher">
   <div class="layout-btn active" id="btn-single" onclick="switchLayout('single')">
-    <span class="lb-icon">🏍</span>
-    1 Veículo
-    <span class="lb-sub">Um card por vez</span>
+    <span class="lb-icon">🏍</span>1 Veículo
   </div>
   <div class="layout-btn" id="btn-triple" onclick="switchLayout('triple')">
-    <span class="lb-icon">🏍🏍🏍</span>
-    3 Veículos
-    <span class="lb-sub">Card com trio</span>
+    <span class="lb-icon">🏍🏍🏍</span>3 Veículos
   </div>
   <div class="layout-btn" id="btn-webmotors" onclick="switchLayout('webmotors')">
-    <span class="lb-icon">🌐</span>
-    Webmotors
-    <span class="lb-sub">Capa</span>
+    <span class="lb-icon">🌐</span>Webmotors
   </div>
 </div>
 
@@ -213,7 +212,7 @@
 
 <div class="footer">
   <button class="btn btn-primary" id="btnFill" onclick="doFill()">Preencher Template</button>
-  <button class="btn btn-secondary" onclick="scanPage()">🔍 Verificar camadas na página</button>
+  <button class="btn btn-secondary" onclick="scanPage()">🔍 Verificar camadas</button>
 </div>
 
 </div><!-- /manual-view -->
@@ -221,53 +220,55 @@
 <div id="mass-view" style="display:none">
   <div class="mass-body">
     <div class="tmpl-switch">
-      <div class="tmpl-btn active" id="tmpl-seminovos" onclick="switchTemplate('seminovos')">Seminovos<br><span style="font-size:9px;font-weight:400;color:var(--muted)">1 veículo · 4 fotos</span></div>
-      <div class="tmpl-btn" id="tmpl-triple" onclick="switchTemplate('triple')">3 Veículos<br><span style="font-size:9px;font-weight:400;color:var(--muted)">trio · 1 foto cada</span></div>
-      <div class="tmpl-btn" id="tmpl-webmotors" onclick="switchTemplate('webmotors')">Webmotors<br><span style="font-size:9px;font-weight:400;color:var(--muted)">capa · 1 foto</span></div>
+      <div class="tmpl-btn active" id="tmpl-seminovos" onclick="switchTemplate('seminovos')">Seminovos<span class="tb-sub">1 veículo · 4 fotos</span></div>
+      <div class="tmpl-btn" id="tmpl-triple" onclick="switchTemplate('triple')">3 Veículos<span class="tb-sub">trio · 1 foto cada</span></div>
+      <div class="tmpl-btn" id="tmpl-webmotors" onclick="switchTemplate('webmotors')">Webmotors<span class="tb-sub">capa · 1 foto</span></div>
     </div>
 
     <div class="drop-field">
-      <div class="drop-label">1 · Planilha (.xlsx, .xls ou .csv)</div>
-      <label class="file-btn" id="massSheetBtn"><span class="fb-text">Clique para escolher a planilha</span><input type="file" id="massSheet" accept=".xlsx,.xls,.csv" /></label>
+      <div class="drop-label">1 · Planilha</div>
+      <label class="file-btn" id="massSheetBtn"><span class="fb-text">Escolher planilha (.xlsx, .xls, .csv)</span><input type="file" id="massSheet" accept=".xlsx,.xls,.csv" /></label>
       <div class="status-line" id="massSheetStatus"></div>
     </div>
 
     <div class="drop-field">
-      <div class="drop-label">2 · Imagens (selecione todas de uma vez)</div>
-      <label class="file-btn" id="massImgBtn"><span class="fb-text">Clique para escolher as imagens</span><input type="file" id="massImgs" accept="image/*" multiple /></label>
+      <div class="drop-label">2 · Imagens</div>
+      <label class="file-btn" id="massImgBtn"><span class="fb-text">Escolher imagens (todas de uma vez)</span><input type="file" id="massImgs" accept="image/*" multiple /></label>
       <div class="status-line" id="massImgStatus"></div>
     </div>
 
     <div class="mass-preview" id="massPreview"><table id="massPreviewTable"></table></div>
 
     <div class="status-line" id="massCellStatus"></div>
-    <div class="mass-hint" id="massHint"></div>
+    <details class="mass-hint" id="massHint"><summary>Como funciona</summary><div class="mass-hint-body" id="massHintBody"></div></details>
     <div id="massResult" class="status-line"></div>
   </div>
 
   <div class="footer">
     <button class="btn btn-primary" id="btnMass" onclick="doMassFill()" disabled>Produzir em massa</button>
-    <button class="btn btn-secondary" onclick="massDetect()">🔍 Detectar cards na página</button>
+    <button class="btn btn-secondary" onclick="massDetect()">🔍 Detectar cards</button>
   </div>
 </div>
 
 <div id="complete-view" style="display:none">
   <div class="mass-body">
-    <div class="mass-hint">
-      Uma planilha só. O plugin monta pra cada linha (veículo): o card <strong>Seminovos</strong> e a <strong>capa Webmotors</strong>.
-      A cada 3 veículos, monta também 1 card <strong>3 Veículos</strong>. Todos os layouts precisam já estar montados no Figma
-      (com as camadas <code>$...</code>) — na página ou na seleção atual — pra serem detectados e preenchidos juntos.
-    </div>
+    <details class="mass-hint">
+      <summary>Como funciona</summary>
+      <div class="mass-hint-body">
+        1 planilha, 1 linha por veículo. O plugin monta o card <strong>Seminovos</strong> e a <strong>capa Webmotors</strong> de cada linha
+        e, a cada 3 veículos, também 1 card <strong>3 Veículos</strong>. Os três layouts precisam já estar montados no Figma com as camadas <code>$...</code>.
+      </div>
+    </details>
 
     <div class="drop-field">
-      <div class="drop-label">1 · Planilha (.xlsx, .xls ou .csv)</div>
-      <label class="file-btn" id="completeSheetBtn"><span class="fb-text">Clique para escolher a planilha</span><input type="file" id="completeSheet" accept=".xlsx,.xls,.csv" /></label>
+      <div class="drop-label">1 · Planilha</div>
+      <label class="file-btn" id="completeSheetBtn"><span class="fb-text">Escolher planilha (.xlsx, .xls, .csv)</span><input type="file" id="completeSheet" accept=".xlsx,.xls,.csv" /></label>
       <div class="status-line" id="completeSheetStatus"></div>
     </div>
 
     <div class="drop-field">
-      <div class="drop-label">2 · Imagens (selecione todas de uma vez)</div>
-      <label class="file-btn" id="completeImgBtn"><span class="fb-text">Clique para escolher as imagens</span><input type="file" id="completeImgs" accept="image/*" multiple /></label>
+      <div class="drop-label">2 · Imagens</div>
+      <label class="file-btn" id="completeImgBtn"><span class="fb-text">Escolher imagens (todas de uma vez)</span><input type="file" id="completeImgs" accept="image/*" multiple /></label>
       <div class="status-line" id="completeImgStatus"></div>
     </div>
 
@@ -279,7 +280,7 @@
 
   <div class="footer">
     <button class="btn btn-primary" id="btnComplete" onclick="doCompleteFill()" disabled>Produzir tudo</button>
-    <button class="btn btn-secondary" onclick="completeDetect()">🔍 Detectar cards na página</button>
+    <button class="btn btn-secondary" onclick="completeDetect()">🔍 Detectar cards</button>
   </div>
 </div>
 
@@ -406,7 +407,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var input = type === "textarea"
       ? '<textarea id="' + id + '" placeholder="' + ph + '"></textarea>'
       : '<input type="text" id="' + id + '" placeholder="' + ph + '" />';
-    return '<div class="field"><label>' + lbl + ' <span class="layer-tag">' + tag + '</span></label>' + input + '</div>';
+    return '<div class="field"><label title="' + tag + '">' + lbl + '</label>' + input + '</div>';
   }
 
   function buildOneUpload(key, layerName) {
@@ -425,9 +426,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var area = document.createElement("div");
     area.className = "img-upload";
     area.id = "upload-" + key;
+    area.title = layerName;
     area.innerHTML =
       '<img class="img-thumb" id="thumb-' + key + '" />' +
-      '<div class="img-ph"><strong id="label-' + key + '">Clique para escolher</strong><small>' + layerName + '</small></div>';
+      '<div class="img-ph"><strong id="label-' + key + '">Escolher foto</strong><small>' + layerName + '</small></div>';
     outer.appendChild(area);
 
     var clr = document.createElement("button");
@@ -756,13 +758,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       return "<code>" + l + "</code>";
     }).join(", ");
     var html =
-      "<strong>Colunas da planilha:</strong> " + cols +
-      "<br><strong>Camadas dentro de cada card:</strong> " + layers +
-      "<br>Nas colunas de foto, escreva o <strong>nome do arquivo</strong> (ex.: <code>civic.jpg</code>) e selecione esse arquivo no passo 2.";
+      "<strong>Colunas:</strong> " + cols +
+      "<br><strong>Camadas:</strong> " + layers +
+      "<br>Nas colunas de foto, use o <strong>nome do arquivo</strong> (ex.: <code>civic.jpg</code>).";
     if (isGroup) {
-      html += "<br><strong>1 linha = 1 moto.</strong> A cada " + cfg.groupSize + " linhas o plugin monta 1 card (motos 1, 2 e 3). Se sobrar menos de " + cfg.groupSize + " no final, os slots vazios do último card ficam ocultos.";
+      html += "<br><strong>1 linha = 1 moto</strong> — a cada " + cfg.groupSize + " linhas monta 1 card. Slots sobrando ficam ocultos.";
     }
-    document.getElementById("massHint").innerHTML = html;
+    document.getElementById("massHintBody").innerHTML = html;
   }
 
   function setStatus(id, text, cls) {
