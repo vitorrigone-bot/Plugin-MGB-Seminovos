@@ -101,6 +101,8 @@ O plugin tem duas abas no topo: **✏️ Inserir manual** (tudo acima) e **📊 
 
 No modo massa, cada **linha da planilha vira 1 card** no Figma (exceto no layout **3 Veículos**, onde cada linha é 1 moto — veja abaixo). Funciona com três layouts (escolha no seletor **Seminovos / 3 Veículos / Webmotors**).
 
+**A mesma planilha (formato Seminovos) funciona nos três layouts e também na Produção completa** — inclusive a coluna **Foto Principal** já é aceita como imagem da capa Webmotors (`$img`), então o vendedor não precisa manter planilhas diferentes por layout.
+
 ### Como funciona
 
 1. Monte no Figma **um card modelo** com as camadas nomeadas (as mesmas `$...` de cima). O card pode ser um frame solto ou vários cards num grid dentro de uma página.
@@ -132,7 +134,7 @@ O cabeçalho é lido **sem diferenciar acento/maiúscula** e aceita apelidos.
 |------------------------|---------------|
 | Condição 1 / Cond 1    | `$condição1`  |
 | Condição 2 / Cond 2    | `$condição2`  |
-| Img / Imagem / Foto    | `$img`        |
+| Img / Imagem / Foto / Foto Principal | `$img` |
 
 **3 Veículos** (trio, 1 foto por moto) — funciona diferente das outras: **cada linha é 1 moto**, não 1 card.
 
