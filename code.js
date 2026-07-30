@@ -458,55 +458,79 @@ figma.ui.onmessage = async function(msg) {
     return;
   }
 
-  if (msg.type === "MASS_FILL") {
-    try {
-      var required = msg.required || [];
-      var rows = msg.rows || [];
-      var images = msg.images || {};
-      var warnings = [];
-
-      var imageMap = {};
-      Object.keys(images).forEach(function(k) { imageMap[k.toLowerCase()] = images[k]; });
-
-      var flat = massSortReading(massGetRoots(massSelectionOrPage(), required));
-      if (flat.length === 0) {
-        figma.ui.postMessage({ type: "MASS_FILL_RESULT", ok: false, message: "Nenhum card encontrado na seleção nem na página.", warnings: [] });
-        return;
-      }
-
-      var groups = massGroupByPage(flat);
-      groups = massEnsurePages(groups, rows.length, warnings, required);
-      groups = massTrimPages(groups, rows.length, warnings);
-
-      var allCells = [];
-      groups.forEach(function(g) { allCells = allCells.concat(g.cells); });
-
-      var filled = 0, hiddenCount = 0;
-      for (var i = 0; i < allCells.length; i++) {
-        if (i < rows.length) {
-          try {
-            if ("visible" in allCells[i]) allCells[i].visible = true;
-            await massFillCell(allCells[i], rows[i], imageMap, warnings, i);
-            filled++;
-          } catch (cellErr) {
-            warnings.push("Linha " + (i + 1) + ": erro ao preencher — " + cellErr.message);
-          }
-        } else {
-          if ("visible" in allCells[i]) { allCells[i].visible = false; hiddenCount++; }
-        }
-      }
-
-      if (allCells.length < rows.length) {
-        warnings.unshift("Atenção: " + allCells.length + " card(s) disponíveis, mas " + rows.length + " linha(s) na planilha. Preenchi os primeiros " + allCells.length + ".");
-      }
-      if (hiddenCount > 0) warnings.unshift(hiddenCount + " card(s) sem linha correspondente foram ocultados.");
-
-      figma.ui.postMessage({ type: "MASS_FILL_RESULT", ok: true, message: "Produção concluída: " + filled + " card(s) preenchidos.", warnings: warnings });
-    } catch (err) {
-      figma.ui.postMessage({ type: "MASS_FILL_RESULT", ok: false, message: "Erro inesperado: " + err.message, warnings: [] });
+  if (msg.type === "MASS_DETECT_ALL") {
+    var jobsD = msg.jobs || [];
+    var countsD = {};
+    for (var d = 0; d < jobsD.length; d++) {
+      var jobD = jobsD[d];
+      countsD[jobD.key] = massGetRoots(massSelectionOrPage(), jobD.required || []).length;
     }
+    figma.ui.postMessage({ type: "MASS_DETECT_ALL_RESULT", counts: countsD });
+    return;
+  }
+
+  if (msg.type === "MASS_FILL") {
+    var result = await massFillTemplate(msg.required || [], msg.rows || [], msg.images || {});
+    figma.ui.postMessage({ type: "MASS_FILL_RESULT", ok: result.ok, message: result.message, warnings: result.warnings });
+    return;
+  }
+
+  if (msg.type === "MASS_FILL_ALL") {
+    var jobs = msg.jobs || [];
+    var images = msg.images || {};
+    var results = {};
+    for (var j = 0; j < jobs.length; j++) {
+      var job = jobs[j];
+      if (!job.rows || job.rows.length === 0) continue;
+      results[job.key] = await massFillTemplate(job.required || [], job.rows, images);
+    }
+    figma.ui.postMessage({ type: "MASS_FILL_ALL_RESULT", results: results });
     return;
   }
 
   if (msg.type === "CLOSE") figma.closePlugin();
 };
+
+async function massFillTemplate(required, rows, images) {
+  try {
+    var warnings = [];
+    var imageMap = {};
+    Object.keys(images).forEach(function(k) { imageMap[k.toLowerCase()] = images[k]; });
+
+    var flat = massSortReading(massGetRoots(massSelectionOrPage(), required));
+    if (flat.length === 0) {
+      return { ok: false, message: "Nenhum card encontrado na seleção nem na página para as camadas " + required.join(", ") + ".", warnings: [] };
+    }
+
+    var groups = massGroupByPage(flat);
+    groups = massEnsurePages(groups, rows.length, warnings, required);
+    groups = massTrimPages(groups, rows.length, warnings);
+
+    var allCells = [];
+    groups.forEach(function(g) { allCells = allCells.concat(g.cells); });
+
+    var filled = 0, hiddenCount = 0;
+    for (var i = 0; i < allCells.length; i++) {
+      if (i < rows.length) {
+        try {
+          if ("visible" in allCells[i]) allCells[i].visible = true;
+          await massFillCell(allCells[i], rows[i], imageMap, warnings, i);
+          filled++;
+        } catch (cellErr) {
+          warnings.push("Linha " + (i + 1) + ": erro ao preencher — " + cellErr.message);
+        }
+      } else {
+        if ("visible" in allCells[i]) { allCells[i].visible = false; hiddenCount++; }
+      }
+    }
+
+    if (allCells.length < rows.length) {
+      warnings.unshift("Atenção: " + allCells.length + " card(s) disponíveis, mas " + rows.length + " linha(s) na planilha. Preenchi os primeiros " + allCells.length + ".");
+    }
+    if (hiddenCount > 0) warnings.unshift(hiddenCount + " card(s) sem linha correspondente foram ocultados.");
+
+    return { ok: true, message: "Produção concluída: " + filled + " card(s) preenchidos.", warnings: warnings };
+  } catch (err) {
+    return { ok: false, message: "Erro inesperado: " + err.message, warnings: [] };
+  }
+}

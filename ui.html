@@ -186,6 +186,7 @@
 <div class="mode-tabs">
   <div class="mode-tab active" id="mode-manual" onclick="switchMode('manual')">✏️ Inserir manual</div>
   <div class="mode-tab" id="mode-mass" onclick="switchMode('mass')">📊 Produção em massa</div>
+  <div class="mode-tab" id="mode-complete" onclick="switchMode('complete')">🚀 Produção completa</div>
 </div>
 
 <div id="manual-view">
@@ -247,6 +248,38 @@
   <div class="footer">
     <button class="btn btn-primary" id="btnMass" onclick="doMassFill()" disabled>Produzir em massa</button>
     <button class="btn btn-secondary" onclick="massDetect()">🔍 Detectar cards na página</button>
+  </div>
+</div>
+
+<div id="complete-view" style="display:none">
+  <div class="mass-body">
+    <div class="mass-hint">
+      Uma planilha só. O plugin monta pra cada linha (veículo): o card <strong>Seminovos</strong> e a <strong>capa Webmotors</strong>.
+      A cada 3 veículos, monta também 1 card <strong>3 Veículos</strong>. Todos os layouts precisam já estar montados no Figma
+      (com as camadas <code>$...</code>) — na página ou na seleção atual — pra serem detectados e preenchidos juntos.
+    </div>
+
+    <div class="drop-field">
+      <div class="drop-label">1 · Planilha (.xlsx, .xls ou .csv)</div>
+      <label class="file-btn" id="completeSheetBtn"><span class="fb-text">Clique para escolher a planilha</span><input type="file" id="completeSheet" accept=".xlsx,.xls,.csv" /></label>
+      <div class="status-line" id="completeSheetStatus"></div>
+    </div>
+
+    <div class="drop-field">
+      <div class="drop-label">2 · Imagens (selecione todas de uma vez)</div>
+      <label class="file-btn" id="completeImgBtn"><span class="fb-text">Clique para escolher as imagens</span><input type="file" id="completeImgs" accept="image/*" multiple /></label>
+      <div class="status-line" id="completeImgStatus"></div>
+    </div>
+
+    <div class="mass-preview" id="completePreview"><table id="completePreviewTable"></table></div>
+
+    <div class="status-line" id="completeCellStatus"></div>
+    <div id="completeResult" class="status-line"></div>
+  </div>
+
+  <div class="footer">
+    <button class="btn btn-primary" id="btnComplete" onclick="doCompleteFill()" disabled>Produzir tudo</button>
+    <button class="btn btn-secondary" onclick="completeDetect()">🔍 Detectar cards na página</button>
   </div>
 </div>
 
@@ -568,6 +601,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     if (msg.type === "MASS_DETECT_RESULT") { massOnDetect(msg.count); return; }
     if (msg.type === "MASS_FILL_RESULT") { massOnResult(msg); return; }
+    if (msg.type === "MASS_DETECT_ALL_RESULT") { completeOnDetect(msg.counts); return; }
+    if (msg.type === "MASS_FILL_ALL_RESULT") { completeOnResult(msg.results); return; }
 
     if (msg.type === "SCAN_RESULT") {
       var info = document.getElementById("scanInfo");
@@ -693,9 +728,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function switchMode(mode) {
     document.getElementById("mode-manual").classList.toggle("active", mode === "manual");
     document.getElementById("mode-mass").classList.toggle("active", mode === "mass");
+    document.getElementById("mode-complete").classList.toggle("active", mode === "complete");
     document.getElementById("manual-view").style.display = mode === "manual" ? "block" : "none";
     document.getElementById("mass-view").style.display = mode === "mass" ? "block" : "none";
+    document.getElementById("complete-view").style.display = mode === "complete" ? "block" : "none";
     if (mode === "mass") { renderMassHint(); massDetect(); }
+    if (mode === "complete") { completeDetect(); }
   }
 
   function switchTemplate(t) {
@@ -913,6 +951,206 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       el.appendChild(ul);
     }
     if (msg.ok) showToast("✅ " + msg.message, "success");
+  }
+
+  // ═══════════════════════ PRODUÇÃO COMPLETA (Seminovos + Webmotors + 3 Veículos) ═══════════════════════
+  // Uma única planilha alimenta os três layouts. Reaproveita MASS_TEMPLATES.seminovos e
+  // MASS_TEMPLATES.triple (mesmas colunas de veículo) e mapeia "Foto Principal" para o $img
+  // da capa Webmotors, somando as colunas opcionais de Condição 1/2.
+
+  var COMPLETE_CONDICAO_COLUMNS = [
+    { key: "CONDICAO 1", aliases: ["CONDICAO 1","CONDIÇÃO 1","CONDICAO1","CONDIÇÃO1","COND 1","COND1"], layer: "$condição1", kind: "text" },
+    { key: "CONDICAO 2", aliases: ["CONDICAO 2","CONDIÇÃO 2","CONDICAO2","CONDIÇÃO2","COND 2","COND2"], layer: "$condição2", kind: "text" }
+  ];
+  var COMPLETE_COLUMNS = MASS_TEMPLATES.seminovos.columns.concat(COMPLETE_CONDICAO_COLUMNS);
+
+  var completeRawJson = null;
+  var completeRows = [];
+  var completeImages = {};
+  var completeCellCounts = { seminovos: 0, triple: 0, webmotors: 0 };
+
+  document.getElementById("completeSheet").addEventListener("change", function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var data = new Uint8Array(ev.target.result);
+        var wb = XLSX.read(data, { type: "array" });
+        var sheet = wb.Sheets[wb.SheetNames[0]];
+        completeRawJson = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        parseCompleteRows();
+        var btn = document.getElementById("completeSheetBtn");
+        btn.classList.add("done");
+        btn.querySelector(".fb-text").textContent = file.name;
+      } catch (err) {
+        completeRawJson = null; completeRows = [];
+        setStatus("completeSheetStatus", "Erro ao ler a planilha: " + err.message, "err");
+      }
+      updateCompleteBtn();
+      e.target.value = "";
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  function parseCompleteRows() {
+    completeRows = (completeRawJson || []).map(function(raw) {
+      var normMap = {};
+      Object.keys(raw).forEach(function(k) { normMap[normHeader(k)] = raw[k]; });
+      var row = {};
+      COMPLETE_COLUMNS.forEach(function(col) {
+        var val = "";
+        for (var i = 0; i < col.aliases.length; i++) {
+          var a = normHeader(col.aliases[i]);
+          if (normMap[a] !== undefined) { val = normMap[a]; break; }
+        }
+        row[col.key] = (val == null) ? "" : String(val).trim();
+      });
+      return row;
+    });
+    var msgParts = [completeRows.length + " veículo(s) carregado(s)."];
+    msgParts.push(Math.ceil(completeRows.length / 3) + " card(s) de 3 Veículos" + (completeRows.length >= 3 ? "" : " (precisa de 3+ veículos)"));
+    setStatus("completeSheetStatus", msgParts.join(" "), "ok");
+    renderCompletePreview();
+  }
+
+  function renderCompletePreview() {
+    var wrap = document.getElementById("completePreview");
+    if (!completeRows.length) { wrap.classList.remove("visible"); return; }
+    var html = "<tr>" + COMPLETE_COLUMNS.map(function(c) { return "<th>" + c.key + "</th>"; }).join("") + "</tr>";
+    completeRows.forEach(function(r) {
+      html += "<tr>" + COMPLETE_COLUMNS.map(function(c) { return "<td>" + escapeHtml(massAffix(c, r[c.key])) + "</td>"; }).join("") + "</tr>";
+    });
+    document.getElementById("completePreviewTable").innerHTML = html;
+    wrap.classList.add("visible");
+  }
+
+  document.getElementById("completeImgs").addEventListener("change", function(e) {
+    var files = Array.prototype.slice.call(e.target.files);
+    completeImages = {};
+    if (!files.length) { updateCompleteBtn(); return; }
+    var loaded = 0;
+    files.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        completeImages[file.name.toLowerCase()] = ev.target.result;
+        loaded++;
+        if (loaded === files.length) {
+          setStatus("completeImgStatus", files.length + " imagem(ns) carregada(s).", "ok");
+          var btn = document.getElementById("completeImgBtn");
+          btn.classList.add("done");
+          btn.querySelector(".fb-text").textContent = files.length + " imagem(ns) selecionada(s)";
+          updateCompleteBtn();
+          e.target.value = "";
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  });
+
+  function updateCompleteBtn() {
+    var anyCells = completeCellCounts.seminovos > 0 || completeCellCounts.triple > 0 || completeCellCounts.webmotors > 0;
+    document.getElementById("btnComplete").disabled = !(completeRows.length > 0 && anyCells);
+  }
+
+  function completeDetect() {
+    parent.postMessage({ pluginMessage: { type: "MASS_DETECT_ALL", jobs: [
+      { key: "seminovos", required: MASS_TEMPLATES.seminovos.required },
+      { key: "triple",    required: MASS_TEMPLATES.triple.required },
+      { key: "webmotors", required: MASS_TEMPLATES.webmotors.required }
+    ] } }, "*");
+  }
+
+  function completeOnDetect(counts) {
+    completeCellCounts = counts || { seminovos: 0, triple: 0, webmotors: 0 };
+    var parts = [
+      completeCellCounts.seminovos + " Seminovos",
+      completeCellCounts.triple + " 3-Veículos",
+      completeCellCounts.webmotors + " Webmotors"
+    ];
+    var anyCells = completeCellCounts.seminovos > 0 || completeCellCounts.triple > 0 || completeCellCounts.webmotors > 0;
+    setStatus("completeCellStatus", "Detectado: " + parts.join(" · "), anyCells ? "ok" : "warn");
+    updateCompleteBtn();
+  }
+
+  // Monta as linhas de cada layout a partir das mesmas linhas da planilha (1 linha = 1 veículo).
+  function buildCompleteJobs() {
+    var jobs = [];
+
+    var seminovosRows = completeRows.map(function(r) {
+      var texts = [], images = [];
+      MASS_TEMPLATES.seminovos.columns.forEach(function(col) {
+        if (col.kind === "image") images.push({ layer: col.layer, fileName: r[col.key] || "" });
+        else texts.push({ layer: col.layer, value: massAffix(col, r[col.key]) });
+      });
+      return { texts: texts, images: images };
+    });
+    jobs.push({ key: "seminovos", required: MASS_TEMPLATES.seminovos.required, rows: seminovosRows });
+
+    if (completeRows.length >= 3) {
+      var oldMassRows = massRows;
+      massRows = completeRows;
+      var tripleRows = buildGroupedRows(MASS_TEMPLATES.triple);
+      massRows = oldMassRows;
+      jobs.push({ key: "triple", required: MASS_TEMPLATES.triple.required, rows: tripleRows });
+    }
+
+    var webmotorsRows = completeRows.map(function(r) {
+      var texts = [
+        { layer: "$condição1", value: r["CONDICAO 1"] || "" },
+        { layer: "$condição2", value: r["CONDICAO 2"] || "" }
+      ];
+      var images = [{ layer: "$img", fileName: r["FOTO PRINCIPAL"] || "" }];
+      return { texts: texts, images: images };
+    });
+    jobs.push({ key: "webmotors", required: MASS_TEMPLATES.webmotors.required, rows: webmotorsRows });
+
+    return jobs;
+  }
+
+  function doCompleteFill() {
+    if (!completeRows.length) { showToast("Carregue a planilha", "error"); return; }
+    var jobs = buildCompleteJobs();
+    document.getElementById("btnComplete").disabled = true;
+    setStatus("completeResult", "Produzindo todos os layouts...", "");
+    parent.postMessage({ pluginMessage: {
+      type: "MASS_FILL_ALL",
+      jobs: jobs,
+      images: completeImages
+    } }, "*");
+  }
+
+  var COMPLETE_LABELS = { seminovos: "Seminovos", triple: "3 Veículos", webmotors: "Webmotors" };
+
+  function completeOnResult(results) {
+    document.getElementById("btnComplete").disabled = false;
+    results = results || {};
+    var el = document.getElementById("completeResult");
+    el.innerHTML = "";
+    var anyOk = false, anyFail = false;
+    Object.keys(results).forEach(function(key) {
+      var r = results[key];
+      if (r.ok) anyOk = true; else anyFail = true;
+      var line = document.createElement("div");
+      line.className = "status-line " + (r.ok ? "ok" : "err");
+      line.textContent = (COMPLETE_LABELS[key] || key) + ": " + r.message;
+      el.appendChild(line);
+      if (r.warnings && r.warnings.length) {
+        var ul = document.createElement("ul");
+        ul.className = "warnings";
+        r.warnings.forEach(function(w) { var li = document.createElement("li"); li.textContent = w; ul.appendChild(li); });
+        el.appendChild(ul);
+      }
+    });
+    if (completeRows.length < 3 && !results.triple) {
+      var info = document.createElement("div");
+      info.className = "status-line";
+      info.textContent = "3 Veículos: pulado (só " + completeRows.length + " veículo(s) — precisa de 3+).";
+      el.appendChild(info);
+    }
+    if (anyOk && !anyFail) showToast("✅ Produção completa concluída!", "success");
+    else if (anyOk) showToast("⚠️ Concluído com avisos/erros", "error");
+    else showToast("Erro na produção completa. Veja os detalhes.", "error");
   }
 </script>
 </body>

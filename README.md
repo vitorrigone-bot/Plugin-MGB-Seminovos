@@ -65,6 +65,36 @@ Preenchimento simples: 2 condições + foto da moto.
 
 ---
 
+## Produção completa (planilha única → todos os layouts)
+
+O plugin tem uma terceira aba, **🚀 Produção completa**, pra quando você quer gerar tudo de uma vez a partir de **uma única planilha** com os dados dos veículos (1 linha = 1 veículo).
+
+A partir dessa planilha, o plugin monta automaticamente:
+
+- **Seminovos**: 1 card por veículo (linha)
+- **Webmotors**: 1 capa por veículo, usando a **Foto Principal** da planilha como `$img` e as colunas opcionais **Condição 1** / **Condição 2**
+- **3 Veículos**: se houver **3 ou mais veículos** na planilha, monta 1 card de trio a cada 3 linhas (mesma lógica de agrupamento do modo massa — último card com slot vazio fica oculto)
+
+### Como usar
+
+1. Monte no Figma os cards-modelo dos **três layouts** (Seminovos, 3 Veículos e Webmotors) com as camadas `$...` nomeadas — podem estar na mesma página ou na seleção atual.
+2. Na aba **Produção completa**, suba a planilha (mesmas colunas do layout Seminovos, ver tabela abaixo, mais **Condição 1** / **Condição 2** para a capa) e depois todas as imagens.
+3. Clique em **Produzir tudo**. O plugin detecta os cards de cada layout separadamente e preenche cada um, duplicando página/frame automaticamente quando faltar espaço (mesmo comportamento do modo massa).
+4. O resultado mostra o status de cada layout (Seminovos / 3 Veículos / Webmotors) com avisos próprios. Se houver menos de 3 veículos, o layout 3 Veículos é pulado (aparece um aviso, não é erro).
+
+### Colunas da planilha (Produção completa)
+
+Mesmas colunas do layout **Seminovos** (veja tabela abaixo) mais:
+
+| Coluna (aceita)        | Camada usada na capa Webmotors |
+|------------------------|---------------------------------|
+| Condição 1 / Cond 1    | `$condição1`                    |
+| Condição 2 / Cond 2    | `$condição2`                    |
+
+A foto usada na capa Webmotors é a mesma da coluna **Foto Principal**.
+
+---
+
 ## Produção em massa (via planilha)
 
 O plugin tem duas abas no topo: **✏️ Inserir manual** (tudo acima) e **📊 Produção em massa**.
