@@ -67,6 +67,41 @@ async function fillText(layerName, value) {
   }
 }
 
+// ─── Preencher condição da capa Webmotors (oculta a caixa/pill quando vazio) ──
+
+async function fillCondition(layerName, value) {
+  var node = getTargetNode(layerName);
+  if (!node) return { ok: false, reason: "camada \"" + layerName + "\" não encontrada" };
+  if (node.type !== "TEXT") return { ok: false, reason: "\"" + layerName + "\" não é texto" };
+
+  var isEmpty = !value || value.trim() === "";
+  var finalValue = isEmpty ? " " : value;
+
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.characters = finalValue;
+  } catch (e) {
+    try {
+      var fonts = new Set();
+      for (var i = 0; i < node.characters.length; i++) {
+        fonts.add(JSON.stringify(node.getRangeFontName(i, i + 1)));
+      }
+      var fontArr = [];
+      fonts.forEach(function(f) { fontArr.push(figma.loadFontAsync(JSON.parse(f))); });
+      await Promise.all(fontArr);
+      node.characters = finalValue;
+    } catch (e2) {
+      return { ok: false, reason: e2.message };
+    }
+  }
+
+  // A caixa/pill colorida é o frame pai do texto — oculta ela inteira quando vazio.
+  var box = (node.parent && node.parent.type !== "PAGE") ? node.parent : node;
+  if ("visible" in box) box.visible = !isEmpty;
+  if (box !== node && "visible" in node) node.visible = true;
+  return { ok: true };
+}
+
 // ─── Preencher info (com controle de visibilidade) ──────────────────
 
 async function fillInfo(layerName, value) {
@@ -331,10 +366,14 @@ async function massLoadFonts(node) {
   await Promise.all(arr);
 }
 
-async function massSetText(node, value) {
+async function massSetText(node, value, hideBox) {
   var isEmpty = value == null || String(value).trim() === "";
-  if (isEmpty) { if ("visible" in node) node.visible = false; return; }
-  if ("visible" in node) node.visible = true;
+  // hideBox: oculta o frame pai inteiro (a caixa/pill) em vez de só o texto — usado
+  // nas condições da capa Webmotors, cujo texto vive dentro de uma caixa colorida.
+  var target = (hideBox && node.parent && node.parent.type !== "PAGE") ? node.parent : node;
+  if (isEmpty) { if ("visible" in target) target.visible = false; return; }
+  if ("visible" in target) target.visible = true;
+  if (target !== node && "visible" in node) node.visible = true;
   await massLoadFonts(node);
   node.characters = String(value);
 }
@@ -351,7 +390,7 @@ async function massFillCell(root, row, imageMap, warnings, rowIndex) {
     var node = massFindLayer(root, t.layer);
     if (!node) continue;
     if (node.type !== "TEXT") { warnings.push("Linha " + (rowIndex + 1) + ": \"" + t.layer + "\" não é uma camada de texto."); continue; }
-    await massSetText(node, t.value);
+    await massSetText(node, t.value, t.hideBox);
   }
   for (var j = 0; j < row.images.length; j++) {
     var im = row.images[j];
@@ -417,6 +456,7 @@ figma.ui.onmessage = async function(msg) {
       var field = msg.fields[i];
       var result;
       if (field.kind === "info") result = await fillInfo(field.layerName, field.value);
+      else if (field.kind === "condition") result = await fillCondition(field.layerName, field.value);
       else if (field.kind === "text") result = await fillText(field.layerName, field.value);
       else if (field.kind === "image") result = await fillImage(field.layerName, field.base64);
       if (result.ok) successes.push(field.layerName);
@@ -435,6 +475,7 @@ figma.ui.onmessage = async function(msg) {
       var field = msg.fields[i];
       var result;
       if (field.kind === "info") result = await fillInfo(field.layerName, field.value);
+      else if (field.kind === "condition") result = await fillCondition(field.layerName, field.value);
       else if (field.kind === "text") result = await fillText(field.layerName, field.value);
       else if (field.kind === "image") result = await fillImage(field.layerName, field.base64);
       if (result.ok) successes.push(field.layerName);

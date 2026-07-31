@@ -45,6 +45,8 @@ Preenchimento simples: 2 condições + foto da moto.
 
 > **Atenção:** os nomes `$condição1` e `$condição2` usam acento e cedilha — nomeie as camadas no Figma exatamente assim.
 
+> **Estrutura da camada:** o texto `$condição1`/`$condição2` deve estar **dentro do seu próprio frame/caixa** (a "pill" colorida). Quando o campo fica vazio, o plugin oculta esse frame pai inteiro — não só o texto — então a caixa colorida some junto. Se o texto estiver solto (sem frame próprio como pai), o plugin oculta o próprio texto.
+
 ---
 
 ## Como usar

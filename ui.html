@@ -521,8 +521,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       var wmFields = [];
       var c1 = document.getElementById("wm-cond1");
       var c2 = document.getElementById("wm-cond2");
-      wmFields.push({ kind: "text", layerName: "$condi\u00e7\u00e3o1", value: c1 ? c1.value.trim() : "" });
-      wmFields.push({ kind: "text", layerName: "$condi\u00e7\u00e3o2", value: c2 ? c2.value.trim() : "" });
+      wmFields.push({ kind: "condition", layerName: "$condi\u00e7\u00e3o1", value: c1 ? c1.value.trim() : "" });
+      wmFields.push({ kind: "condition", layerName: "$condi\u00e7\u00e3o2", value: c2 ? c2.value.trim() : "" });
       var wmImg = imageState["wm-img"];
       if (wmImg) wmFields.push({ kind: "image", layerName: "$img", base64: wmImg.base64, mime: wmImg.mime });
 
@@ -686,8 +686,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     webmotors: {
       required: ["$condição1", "$img"],
       columns: [
-        { key: "CONDICAO 1", aliases: ["CONDICAO 1","CONDIÇÃO 1","CONDICAO1","CONDIÇÃO1","COND 1","COND1"], layer: "$condição1", kind: "text" },
-        { key: "CONDICAO 2", aliases: ["CONDICAO 2","CONDIÇÃO 2","CONDICAO2","CONDIÇÃO2","COND 2","COND2"], layer: "$condição2", kind: "text" },
+        { key: "CONDICAO 1", aliases: ["CONDICAO 1","CONDIÇÃO 1","CONDICAO1","CONDIÇÃO1","COND 1","COND1"], layer: "$condição1", kind: "text", hideBox: true },
+        { key: "CONDICAO 2", aliases: ["CONDICAO 2","CONDIÇÃO 2","CONDICAO2","CONDIÇÃO2","COND 2","COND2"], layer: "$condição2", kind: "text", hideBox: true },
         { key: "IMG",        aliases: ["IMG","IMAGEM","FOTO","FOTO PRINCIPAL","FOTOPRINCIPAL","PRINCIPAL"], layer: "$img",       kind: "image" }
       ]
     }
@@ -887,7 +887,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       var texts = [], images = [];
       cfg.columns.forEach(function(col) {
         if (col.kind === "image") images.push({ layer: col.layer, fileName: r[col.key] || "" });
-        else texts.push({ layer: col.layer, value: massAffix(col, r[col.key]) });
+        else texts.push({ layer: col.layer, value: massAffix(col, r[col.key]), hideBox: !!col.hideBox });
       });
       return { texts: texts, images: images };
     });
@@ -962,8 +962,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   // da capa Webmotors, somando as colunas opcionais de Condição 1/2.
 
   var COMPLETE_CONDICAO_COLUMNS = [
-    { key: "CONDICAO 1", aliases: ["CONDICAO 1","CONDIÇÃO 1","CONDICAO1","CONDIÇÃO1","COND 1","COND1"], layer: "$condição1", kind: "text" },
-    { key: "CONDICAO 2", aliases: ["CONDICAO 2","CONDIÇÃO 2","CONDICAO2","CONDIÇÃO2","COND 2","COND2"], layer: "$condição2", kind: "text" }
+    { key: "CONDICAO 1", aliases: ["CONDICAO 1","CONDIÇÃO 1","CONDICAO1","CONDIÇÃO1","COND 1","COND1"], layer: "$condição1", kind: "text", hideBox: true },
+    { key: "CONDICAO 2", aliases: ["CONDICAO 2","CONDIÇÃO 2","CONDICAO2","CONDIÇÃO2","COND 2","COND2"], layer: "$condição2", kind: "text", hideBox: true }
   ];
   var COMPLETE_COLUMNS = MASS_TEMPLATES.seminovos.columns.concat(COMPLETE_CONDICAO_COLUMNS);
 
@@ -1100,8 +1100,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     var webmotorsRows = completeRows.map(function(r) {
       var texts = [
-        { layer: "$condição1", value: r["CONDICAO 1"] || "" },
-        { layer: "$condição2", value: r["CONDICAO 2"] || "" }
+        { layer: "$condição1", value: r["CONDICAO 1"] || "", hideBox: true },
+        { layer: "$condição2", value: r["CONDICAO 2"] || "", hideBox: true }
       ];
       var images = [{ layer: "$img", fileName: r["FOTO PRINCIPAL"] || "" }];
       return { texts: texts, images: images };
